@@ -49,6 +49,17 @@ killasgroup=true
 stopsignal=INT
 stdout_logfile=_SITE_ROOT_/logs/stat_prometheus_node_v1.log
 ]],
+    supervisor = [[
+[program:explorer_loki]
+command=/bin/bash _SITE_ROOT_/scripts/run loop _service_loki _SITE_ROOT_ v1
+autorestart=true
+redirect_stderr=true
+stopasgroup=true
+killasgroup=true
+stopsignal=INT
+stdout_logfile=_SITE_ROOT_/logs/explorer_loki.log
+
+]],
     supervisor1 = [[
 [program:stat_prometheus]
 command=/bin/bash _SITE_ROOT_/scripts/run loop _service_prometheus _SITE_ROOT_ v1
