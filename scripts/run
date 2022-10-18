@@ -132,12 +132,13 @@ _install() {
 }
 
 _service_loki() {
+	sed "s/_SITE_ROOT_/$SITE_ROOT/g" $SITE_ROOT/etc/loki/config_tmpl.yaml >$SITE_ROOT/etc/loki/config.yaml
 	$LOKI --config.file=$SITE_ROOT/etc/loki/config.yaml
 }
-# _service_grafana() {
-# 	mkdir -p $SITE_ROOT/data/grafana
-# 	exec $GRAFANA_DIR/bin/grafana-server -config $SITE_ROOT/etc/grafana/stat.ini -homepath $GRAFANA_DIR
-# }
+_service_grafana() {
+	sed "s/_SITE_ROOT_/$SITE_ROOT/g" $SITE_ROOT/etc/grafana/config_tmpl.ini >$SITE_ROOT/etc/grafana/config.ini
+	$GRAFANA_DIR/bin/grafana-server -config $SITE_ROOT/etc/grafana/config.ini
+}
 
 _reload() {
 	pkill -f push.py
@@ -158,6 +159,34 @@ _save_env() {
 	if [ -n "$EXPLORER_NETWORK" ]; then echo $EXPLORER_NETWORK >$SITE_ROOT/vars/EXPLORER_NETWORK; fi
 	if [ -n "$EXPLORER_BLOCKCHAIN" ]; then echo $EXPLORER_BLOCKCHAIN >$SITE_ROOT/vars/EXPLORER_BLOCKCHAIN; fi
 }
+
+_update_tag() {
+	PORTAL_DOMAIN=portal.$DOMAIN
+	git="git -C $SITE_ROOT"
+	_v=$($git config --get remote.origin.url | awk -F'/' '{print $NF}')
+	tmp=$(mktemp)
+	curl -sfkL http://$PORTAL_DOMAIN/deploy/info/version/$_v >$tmp
+	if [ $? -ne 0 ]; then
+		rm $tmp
+		return 0
+	fi
+
+	_tag=$(cat $tmp)
+
+	rm $tmp
+
+	_my_tag=$($git describe --tags)
+	_tag_update=0
+	if [ "$_tag" != "$_my_tag" ]; then
+		$git fetch --all --tags --prune
+		$git checkout $_tag
+		_tag_update=1
+	fi
+
+	return $_tag_update
+
+}
+
 _update() {
 	echo "Update"
 
@@ -166,6 +195,11 @@ _update() {
 	# _discover_host
 	_update_repos
 	_st_update=$?
+
+	_update_tag
+	if [ $_st_update -eq 0 ]; then
+		_st_update=$?
+	fi
 	# _rebuild_conf
 	return $_st_update
 }
