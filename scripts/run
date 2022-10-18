@@ -2,7 +2,7 @@
 TYPE="stat"
 
 SITE_ROOT=$(realpath $(dirname $(realpath $0))/..)
-
+SITE_ROOT1=$(echo $SITE_ROOT | sed 's/\//\\\//g')
 export HOME=$SITE_ROOT
 ROOT_DIR=$SITE_ROOT
 
@@ -132,11 +132,11 @@ _install() {
 }
 
 _service_loki() {
-	sed "s/_SITE_ROOT_/$SITE_ROOT/g" $SITE_ROOT/etc/loki/config_tmpl.yaml >$SITE_ROOT/etc/loki/config.yaml
+	sed "s/_SITE_ROOT_/$SITE_ROOT1/g" $SITE_ROOT/etc/loki/config_tmpl.yaml >$SITE_ROOT/etc/loki/config.yaml
 	$LOKI --config.file=$SITE_ROOT/etc/loki/config.yaml
 }
 _service_grafana() {
-	sed "s/_SITE_ROOT_/$SITE_ROOT/g" $SITE_ROOT/etc/grafana/config_tmpl.ini >$SITE_ROOT/etc/grafana/config.ini
+	sed "s/_SITE_ROOT_/$SITE_ROOT1/g" $SITE_ROOT/etc/grafana/config_tmpl.ini >$SITE_ROOT/etc/grafana/config.ini
 	$GRAFANA_DIR/bin/grafana-server -config $SITE_ROOT/etc/grafana/config.ini
 }
 
