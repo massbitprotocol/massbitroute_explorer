@@ -1,3 +1,4 @@
+**/.*~
 .gitconfig
 env/
 /db/
@@ -15,3 +16,5 @@ src/
 src/env.lua
 src/env.lua
 /.parallel/
+/etc/loki/config.yaml
+/etc/grafana/config.ini
