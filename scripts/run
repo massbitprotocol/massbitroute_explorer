@@ -26,7 +26,7 @@ _repo() {
 		echo "GIT_PUBLIC_URL missing"
 		exit 1
 	fi
-
+	export ENV_BRANCH=${ENV_BRANCH:-$GIT_PRIVATE_BRANCH}
 	export ASDF_BRANCH=${ASDF_BRANCH:-$MBR_ENV}
 	export SSL_BRANCH=${SSL_BRANCH:-$MBR_ENV}
 	export STAT_BRANCH=${STAT_BRANCH:-$MBR_ENV}
