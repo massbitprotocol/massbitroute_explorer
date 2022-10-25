@@ -95,13 +95,21 @@ _update_repos() {
 		echo "Need GIT_PRIVATE_READ_URL"
 		exit 1
 	fi
+	_update_status=0
+
 	_repo_private
 	_update_sources $REPOS_PRIVATE
-	_update_status=$?
-	_update_sources $REPOS_RUNTIME
+	_st=$?
 	if [ $_update_status -eq 0 ]; then
-		_update_status=$?
+		_update_status=$_st
 	fi
+
+	_update_sources $REPOS_RUNTIME
+	_st=$?
+	if [ $_update_status -eq 0 ]; then
+		_update_status=$_st
+	fi
+
 	return $_update_status
 }
 
@@ -194,14 +202,20 @@ _update() {
 
 	_save_env
 
+	_st_update=0
+
 	# _discover_host
 	_update_repos
-	_st_update=$?
+	_st=$?
+	if [ $_st_update -eq 0 ]; then
+		_st_update=$_st
+	fi
 
 	_update_tag
 	if [ $_st_update -eq 0 ]; then
-		_st_update=$?
+		_st_update=$_st
 	fi
+
 	# _rebuild_conf
 	return $_st_update
 }
