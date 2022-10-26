@@ -31,6 +31,7 @@ _env() {
 		source $SITE_ROOT/env/env.sh
 	fi
 	if [ -f "$SITE_ROOT/env/env.lua" ]; then
+		mkdir -p $SITE_ROOT/src/
 		cp $SITE_ROOT/env/env.lua $SITE_ROOT/src/
 	fi
 
