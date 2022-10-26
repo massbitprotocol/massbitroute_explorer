@@ -12,6 +12,7 @@ cd $SITE_ROOT
 
 mbr_root=/massbit/massbitroute/app
 service_dir=$mbr_root/src/sites/services
+chmod +x $SITE_ROOT/scripts/run
 
 ASDF=$SITE_ROOT/bin/.asdf/installs
 LOKI=$ASDF/loki/v2.6.1/bin/loki
@@ -27,11 +28,16 @@ _repo() {
 		exit 1
 	fi
 	export ENV_BRANCH=${ENV_BRANCH:-$GIT_PRIVATE_BRANCH}
-	export ASDF_BRANCH=${ASDF_BRANCH:-$MBR_ENV}
-	export SSL_BRANCH=${SSL_BRANCH:-$MBR_ENV}
-	export STAT_BRANCH=${STAT_BRANCH:-$MBR_ENV}
-	export MKAGENT_BRANCH=${MKAGENT_BRANCH:-$MBR_ENV}
-	REPOS=""
+	export ASDF_BRANCH=latest
+	export GBC_BRANCH=latest
+	export MKAGENT_BRANCH=latest
+
+	REPOS="\
+	   $service_dir/mkagent|$GIT_PUBLIC_URL/massbitprotocol/massbitroute_mkagent.git|$MKAGENT_BRANCH \
+	 $mbr_root/gbc|$GIT_PUBLIC_URL/massbitprotocol/massbitroute_gbc|$GBC_BRANCH \
+	 $mbr_root/gbc/bin/.asdf|$GIT_PUBLIC_URL/massbitprotocol/massbitroute_asdf|$ASDF_BRANCH \
+"
+
 }
 
 _repo_private() {
@@ -47,11 +53,6 @@ _repo_private() {
 		echo "GIT_PRIVATE_BRANCH missing"
 		exit 1
 	fi
-
-	export MKAGENT_BRANCH=${MKAGENT_BRANCH:-$MBR_ENV}
-
-	export GBC_BRANCH=${GBC_BRANCH:-$MBR_ENV}
-	export ASDF_BRANCH=${ASDF_BRANCH:-$MBR_ENV}
 
 	export ENV_BRANCH=${ENV_BRANCH:-$GIT_PRIVATE_BRANCH}
 	export SSL_BRANCH=${SSL_BRANCH:-$GIT_PRIVATE_BRANCH}
@@ -97,6 +98,13 @@ _update_repos() {
 	fi
 	_update_status=0
 
+	_repo
+	_update_sources $REPOS
+	_st=$?
+	if [ $_update_status -eq 0 ]; then
+		_update_status=$_st
+	fi
+
 	_repo_private
 	_update_sources $REPOS_PRIVATE
 	_st=$?
@@ -104,11 +112,11 @@ _update_repos() {
 		_update_status=$_st
 	fi
 
-	_update_sources $REPOS_RUNTIME
-	_st=$?
-	if [ $_update_status -eq 0 ]; then
-		_update_status=$_st
-	fi
+	# _update_sources $REPOS_RUNTIME
+	# _st=$?
+	# if [ $_update_status -eq 0 ]; then
+	# 	_update_status=$_st
+	# fi
 
 	return $_update_status
 }
@@ -204,7 +212,6 @@ _update() {
 
 	_st_update=0
 
-	# _discover_host
 	_update_repos
 	_st=$?
 	if [ $_st_update -eq 0 ]; then
@@ -212,11 +219,11 @@ _update() {
 	fi
 
 	_update_tag
+	_st=$?
 	if [ $_st_update -eq 0 ]; then
 		_st_update=$_st
 	fi
 
-	# _rebuild_conf
 	return $_st_update
 }
 
