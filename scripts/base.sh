@@ -64,8 +64,8 @@ _git_clone() {
 	git -C $_dir status -uno | grep -i "Your branch is behind" >/dev/null
 	if [ $? -eq 0 ]; then
 		_clone_status=1
-		git -C $_dir pull origin $_branch
 	fi
+	git -C $_dir pull origin $_branch
 
 	return $_clone_status
 
