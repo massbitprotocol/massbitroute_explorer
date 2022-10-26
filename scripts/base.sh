@@ -65,6 +65,7 @@ _git_clone() {
 	if [ $? -eq 0 ]; then
 		_clone_status=1
 	fi
+
 	git -C $_dir pull origin $_branch
 
 	return $_clone_status
