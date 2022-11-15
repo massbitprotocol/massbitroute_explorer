@@ -209,6 +209,11 @@ _reload() {
 	pkill -f push.py
 	#	curl -X POST http://127.0.0.1:44444/__internal_prometheus/-/reload
 
+	for s in explorer_grafana explorer_loki monitor_client;do
+		 $SITE_ROOT/cmd_server restart $s
+	      done
+		 
+
 	$SITE_ROOT/cmd_server _update
 	$SITE_ROOT/cmd_server update
 	$SITE_ROOT/cmd_server start all
